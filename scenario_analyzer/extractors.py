@@ -1,7 +1,9 @@
-"""Two ways to turn scenario text into a validated dict.
+"""Four ways to turn scenario text into a validated dict.
 
 * RuleBasedExtractor: keyword/regex baseline, works offline.
-* LLMExtractor: calls an LLM API, asks for JSON, validates it, retries once.
+* LLMExtractor: calls the Anthropic API, asks for JSON, validates it, retries once.
+* GeminiExtractor: calls the Google Gemini API (free tier), same contract as LLMExtractor.
+* GroqExtractor: calls the Groq API (free tier, LLaMA-3), OpenAI-compatible interface.
 """
 
 from __future__ import annotations
@@ -93,7 +95,7 @@ class RuleBasedExtractor:
     def _actors(t):
         found = set()
         for actor, pattern in _ACTOR_WORDS.items():
-            for match in re.finditer(rf"\b({pattern})\b", t):
+            for match in re.finditer(rf"\b(" + pattern + ")\b", t):
                 preceding = " ".join(t[: match.start()].split()[-3:])
                 if re.search(r"\b(no|without)\b", preceding):
                     continue  # explicitly absent, e.g. "no pedestrians nearby"
@@ -102,7 +104,7 @@ class RuleBasedExtractor:
 
     @staticmethod
     def _speed(t):
-        match = re.search(r"(\d+(?:\.\d+)?)\s*km\s*/?\s*h", t)
+        match = re.search(r"(\d+(?:\.\d+)?)" + "\s*km\s*/?\s*h", t)
         return int(float(match.group(1))) if match else None
 
 
@@ -149,9 +151,94 @@ class LLMExtractor:
         raise ExtractionError(f"model output was invalid after retries: {last_error}")
 
 
+class GeminiExtractor:
+    """Calls Google Gemini API (free tier) and validates the JSON it returns.
+
+    Requires the GEMINI_API_KEY environment variable.
+    Install: pip install google-generativeai
+    """
+
+    def __init__(self, model: str | None = None, max_retries: int = 1):
+        from google import genai  # lazy import — uses the new google-genai package
+
+        api_key = os.environ.get("GEMINI_API_KEY")
+        if not api_key:
+            raise EnvironmentError(
+                "GEMINI_API_KEY environment variable is not set. "
+                "Get a free key at https://aistudio.google.com"
+            )
+        self.client = genai.Client(api_key=api_key)
+        self.model_name = model or os.environ.get("SCENARIO_MODEL", "gemini-2.0-flash")
+        self.max_retries = max_retries
+
+    def extract(self, text: str) -> dict:
+        from google.genai import types
+
+        last_error: Exception | None = None
+        for _ in range(self.max_retries + 1):
+            response = self.client.models.generate_content(
+                model=self.model_name,
+                contents=text,
+                config=types.GenerateContentConfig(
+                    system_instruction=SYSTEM_PROMPT,
+                    max_output_tokens=400,
+                ),
+            )
+            raw = response.text
+            try:
+                return validate(parse_json_response(raw))
+            except ValueError as err:
+                last_error = err
+        raise ExtractionError(f"model output was invalid after retries: {last_error}")
+
+
+class GroqExtractor:
+    """Calls the Groq API (free tier) using LLaMA-3 and validates the JSON it returns.
+
+    Requires the GROQ_API_KEY environment variable.
+    Get a free key at https://console.groq.com
+    Install: pip install groq
+    """
+
+    def __init__(self, model: str | None = None, max_retries: int = 1):
+        from groq import Groq  # lazy import
+
+        api_key = os.environ.get("GROQ_API_KEY")
+        if not api_key:
+            raise EnvironmentError(
+                "GROQ_API_KEY environment variable is not set. "
+                "Get a free key at https://console.groq.com"
+            )
+        self.client = Groq(api_key=api_key)
+        self.model_name = model or os.environ.get("SCENARIO_MODEL", "qwen/qwen3.8-27b")
+        self.max_retries = max_retries
+
+    def extract(self, text: str) -> dict:
+        last_error: Exception | None = None
+        for _ in range(self.max_retries + 1):
+            response = self.client.chat.completions.create(
+                model=self.model_name,
+                max_tokens=400,
+                messages=[
+                    {"role": "system", "content": SYSTEM_PROMPT},
+                    {"role": "user", "content": text},
+                ],
+            )
+            raw = response.choices[0].message.content
+            try:
+                return validate(parse_json_response(raw))
+            except ValueError as err:
+                last_error = err
+        raise ExtractionError(f"model output was invalid after retries: {last_error}")
+
+
 def get_extractor(name: str):
     if name == "rule":
         return RuleBasedExtractor()
     if name == "llm":
         return LLMExtractor()
-    raise ValueError(f"unknown extractor {name!r} (use 'rule' or 'llm')")
+    if name == "gemini":
+        return GeminiExtractor()
+    if name == "groq":
+        return GroqExtractor()
+    raise ValueError(f"unknown extractor {name!r} (use 'rule', 'llm', 'gemini', or 'groq')")
