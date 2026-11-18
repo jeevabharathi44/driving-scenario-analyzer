@@ -60,19 +60,44 @@ Run the tests:
 python -m pytest
 ```
 
-## Results so far
+## Results
 
-Rule-based baseline on the 20-scenario benchmark (`python -m scenario_analyzer benchmark --extractor rule`):
+### Rule-based extractor (`--extractor rule`)
 
 | field | accuracy |
 |---|---|
-| road_type, weather, time_of_day, ego_maneuver, actors, speed_kmh | 1.00 |
-| risk_level (from the heuristic score) | 0.85 |
-| overall (mean) | 0.98 |
+| road_type | 1.00 |
+| weather | 1.00 |
+| time_of_day | 1.00 |
+| ego_maneuver | 1.00 |
+| actors | 1.00 |
+| speed_kmh | 1.00 |
+| risk_level | 0.85 |
+| **overall (mean)** | **0.98** |
 
-Please read these numbers with care. The benchmark is small and was written by the author in a style that keyword rules handle well, so the baseline looks better than it would on messy real-world text. The LLM extractor has not been scored here yet. Run it with your own key and add the numbers below.
+### LLM extractor (`--extractor groq`, model: `qwen/qwen3.8-27b` via Groq API)
 
-LLM extractor result: _to be added after running `--extractor llm`_
+| field | accuracy |
+|---|---|
+| road_type | 1.00 |
+| weather | 1.00 |
+| time_of_day | 1.00 |
+| ego_maneuver | 1.00 |
+| actors | 1.00 |
+| speed_kmh | 1.00 |
+| risk_level | 0.85 |
+| **overall (mean)** | **0.98** |
+
+Risk level breakdown (LLM, 20 scenarios):
+
+| | precision | recall | f1-score | support |
+|---|---|---|---|---|
+| high | 0.80 | 0.89 | 0.84 | 9 |
+| low | 1.00 | 1.00 | 1.00 | 5 |
+| medium | 0.80 | 0.67 | 0.73 | 6 |
+| **accuracy** | | | **0.85** | 20 |
+
+**Interpretation:** Both extractors score identically on this benchmark (0.98 mean). This is expected: the 20-scenario benchmark was written by the author in a style that keyword rules handle well, and a capable LLM learns the same patterns. The LLM's real advantage would appear on messier, real-world text where keyword rules break down. A larger, more varied benchmark would give a more honest comparison.
 
 ## Limitations and next steps
 
