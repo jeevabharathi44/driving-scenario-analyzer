@@ -1,0 +1,21 @@
+id,text,road_type,weather,time_of_day,ego_maneuver,actors,speed_kmh,risk_level
+1,Ego vehicle cruises at 110 km/h on a clear daytime highway with light traffic.,highway,clear,day,cruise,vehicle,110,low
+2,At night in heavy rain the ego car overtakes a truck on the highway at 90 km/h.,highway,rain,night,overtake,truck,90,high
+3,A pedestrian steps onto an urban crosswalk while the ego car brakes at 40 km/h on a clear day.,urban,clear,day,brake,pedestrian,40,medium
+4,"The ego vehicle turns left at a busy intersection at dusk, with an oncoming vehicle and a cyclist, at 25 km/h.",intersection,clear,dusk,turn_left,cyclist|vehicle,25,high
+5,Fog on a rural road in the morning; a deer crosses and the ego car brakes at 70 km/h.,rural,fog,day,brake,animal,70,high
+6,Snow on an urban street at night; the ego car turns right at 15 km/h with no other road users.,urban,snow,night,turn_right,,15,medium
+7,The ego car changes lane on a clear highway during the day at 100 km/h next to a truck.,highway,clear,day,lane_change,truck,100,medium
+8,"In a parking lot, the ego vehicle turns right at 8 km/h while a pedestrian walks nearby, clear daytime.",parking_lot,clear,day,turn_right,pedestrian,8,low
+9,Heavy rain at an intersection at night: the ego car brakes hard at 50 km/h as a vehicle runs the red light.,intersection,rain,night,brake,vehicle,50,high
+10,A cyclist rides ahead on a rural road in clear weather; the ego car overtakes at 60 km/h during the day.,rural,clear,day,overtake,cyclist,60,high
+11,The ego car cruises through fog on a highway at 80 km/h at dusk with several vehicles around.,highway,fog,dusk,cruise,vehicle,80,medium
+12,Clear day on an urban road: the ego vehicle cruises at 50 km/h behind a bus.,urban,clear,day,cruise,vehicle,50,low
+13,"Night on an urban street in light rain, the ego vehicle turns left at 30 km/h while two pedestrians cross.",urban,rain,night,turn_left,pedestrian,30,high
+14,"Snowy rural road in daytime, the ego car cruises at 60 km/h as a truck approaches in the opposite lane.",rural,snow,day,cruise,truck,60,medium
+15,On a clear highway at night the ego car brakes from 120 km/h because of a stopped vehicle ahead.,highway,clear,night,brake,vehicle,120,high
+16,"The ego car turns right at an intersection in clear daytime at 20 km/h, with no pedestrians nearby.",intersection,clear,day,turn_right,,20,low
+17,Dusk in the parking lot: the ego vehicle cruises slowly at 5 km/h as a cyclist passes.,parking_lot,clear,dusk,cruise,cyclist,5,low
+18,A dog runs across a clear urban road in daytime; the ego vehicle brakes at 35 km/h.,urban,clear,day,brake,animal,35,medium
+19,"In fog at night on a rural road, the ego car overtakes a vehicle at 80 km/h.",rural,fog,night,overtake,vehicle,80,high
+20,The ego car changes lane on an urban road in heavy snow at dusk at 45 km/h with a cyclist in the next lane.,urban,snow,dusk,lane_change,cyclist,45,high
