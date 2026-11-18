@@ -17,11 +17,11 @@ def main(argv=None):
     run = sub.add_parser("run", help="extract structured fields from a CSV with a 'text' column")
     run.add_argument("--input", default="data/benchmark.csv")
     run.add_argument("--output", default="outputs/results.csv")
-    run.add_argument("--extractor", choices=["rule", "llm"], default="rule")
+    run.add_argument("--extractor", choices=["rule", "llm", "gemini", "groq"], default="rule")
 
     bench = sub.add_parser("benchmark", help="score an extractor against labelled data")
     bench.add_argument("--input", default="data/benchmark.csv")
-    bench.add_argument("--extractor", choices=["rule", "llm"], default="rule")
+    bench.add_argument("--extractor", choices=["rule", "llm", "gemini", "groq"], default="rule")
 
     args = parser.parse_args(argv)
     df = pd.read_csv(args.input)
